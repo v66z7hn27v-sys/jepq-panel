@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JEPQ Paneli</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#0b1020; --panel:#121933; --panel2:#18213f; --line:#26305a;
+  --text:#e8ecf8; --muted:#8f9ac0; --accent:#4f8cff; --green:#2ecc8f; --red:#ff6b6b; --gold:#f2b84b;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;font-size:15px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding:24px 16px 60px}
+header{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:12px;margin-bottom:20px}
+h1{margin:0;font-size:26px;font-weight:700;letter-spacing:-.02em}
+h1 span{color:var(--accent)}
+.sub{color:var(--muted);font-size:13px}
+h2{font-size:16px;margin:0 0 14px;font-weight:600}
+.grid{display:grid;gap:16px}
+.kpis{grid-template-columns:repeat(auto-fit,minmax(170px,1fr));margin-bottom:16px}
+.two{grid-template-columns:1fr 1fr}
+@media(max-width:860px){.two{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px}
+.kpi .label{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+.kpi .val{font-family:'JetBrains Mono',monospace;font-size:24px;margin-top:4px}
+.kpi .note{color:var(--muted);font-size:12px}
+.tv{height:460px;margin-bottom:16px;padding:0;overflow:hidden}
+label{display:block;color:var(--muted);font-size:12px;margin-bottom:4px}
+input,select{width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--text);border-radius:8px;padding:9px 10px;font:inherit;font-family:'JetBrains Mono',monospace}
+input:focus,select:focus{outline:2px solid var(--accent);border-color:transparent}
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:16px}
+.out{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.out div{background:var(--panel2);border-radius:10px;padding:10px 12px}
+.out .l{color:var(--muted);font-size:12px}
+.out .v{font-family:'JetBrains Mono',monospace;font-size:17px}
+.pos{color:var(--green)} .neg{color:var(--red)} .gold{color:var(--gold)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:7px 8px;text-align:right;border-bottom:1px solid var(--line)}
+th:first-child,td:first-child{text-align:left}
+th{color:var(--muted);font-weight:500}
+td{font-family:'JetBrains Mono',monospace}
+.scroll{max-height:340px;overflow:auto}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.tabs button{background:var(--panel2);border:1px solid var(--line);color:var(--muted);padding:7px 14px;border-radius:8px;cursor:pointer;font:inherit}
+.tabs button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.hint{color:var(--muted);font-size:12px;margin-top:12px}
+footer{color:var(--muted);font-size:12px;margin-top:28px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div>
+    <h1><span>JEPQ</span> Paneli</h1>
+    <div class="sub">JPMorgan Nasdaq Equity Premium Income ETF (Exchange Traded Fund) · aylık dağıtım ve opsiyon getiri takibi</div>
+  </div>
+  <div class="sub" id="updated"></div>
+</header>
+
+<div class="grid kpis">
+  <div class="card kpi"><div class="label">Son kapanış</div><div class="val" id="kPrice">–</div><div class="note" id="kPriceDate"></div></div>
+  <div class="card kpi"><div class="label">Son dağıtım</div><div class="val gold" id="kLast">–</div><div class="note" id="kLastDate"></div></div>
+  <div class="card kpi"><div class="label">Son 12 ay dağıtım</div><div class="val" id="kTTM">–</div><div class="note">TTM (Trailing Twelve Months)</div></div>
+  <div class="card kpi"><div class="label">Son 12 ay getiri</div><div class="val pos" id="kYield">–</div><div class="note">dağıtım / fiyat</div></div>
+  <div class="card kpi"><div class="label">Aylık ortalama</div><div class="val" id="kAvg">–</div><div class="note" id="kRange"></div></div>
+</div>
+
+<div class="card tv">
+  <div class="tradingview-widget-container" style="height:100%;width:100%">
+    <div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
+    <script src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>
+    {"autosize":true,"symbol":"NASDAQ:JEPQ","interval":"D","timezone":"Europe/Istanbul","theme":"dark","style":"1","locale":"tr","backgroundColor":"#121933","gridColor":"rgba(38,48,90,0.6)","allow_symbol_change":true,"compareSymbols":[{"symbol":"NASDAQ:QQQ","position":"SameScale"}],"support_host":"https://www.tradingview.com"}
+    </script>
+  </div>
+</div>
+
+<div class="grid two">
+  <div class="card">
+    <h2>Aylık dağıtımlar (hisse başı $)</h2>
+    <div style="position:relative;height:300px"><canvas id="distChart"></canvas></div>
+  </div>
+  <div class="card">
+    <h2>Dağıtım geçmişi</h2>
+    <div class="scroll"><table id="distTable"><thead><tr><th>Hak kesim</th><th>Ödeme</th><th>Tutar $</th><th>Değişim</th></tr></thead><tbody></tbody></table></div>
+  </div>
+</div>
+
+<div class="card" style="margin-top:16px">
+  <h2>Pasif gelir hesaplayıcı</h2>
+  <div class="fields">
+    <div><label>Yatırım ($)</label><input id="inv" type="number" value="100000" step="1000"></div>
+    <div><label>Alış fiyatı ($)</label><input id="buyPx" type="number" step="0.01"></div>
+    <div><label>Aylık dağıtım varsayımı ($/hisse)</label><input id="assumeDist" type="number" step="0.001"></div>
+    <div><label>USD/TRY kuru</label><input id="fx" type="number" value="49.75" step="0.01"></div>
+    <div><label>Stopaj (%)</label><input id="tax" type="number" value="0" step="1"></div>
+    <div><label>Yeniden yatırım</label><select id="drip"><option value="0">Hayır – nakit al</option><option value="1">Evet – DRIP (Dividend Reinvestment Plan)</option></select></div>
+    <div><label>Süre (yıl)</label><input id="years" type="number" value="5" min="1" max="30"></div>
+  </div>
+  <div class="out">
+    <div><div class="l">Hisse adedi</div><div class="v" id="oShares">–</div></div>
+    <div><div class="l">Aylık net gelir ($)</div><div class="v pos" id="oMonthUsd">–</div></div>
+    <div><div class="l">Aylık net gelir (TL)</div><div class="v gold" id="oMonthTry">–</div></div>
+    <div><div class="l">Yıllık net gelir ($)</div><div class="v" id="oYearUsd">–</div></div>
+    <div><div class="l">Dönem sonu aylık gelir ($)</div><div class="v pos" id="oEndMonth">–</div></div>
+    <div><div class="l">Dönem toplam dağıtım ($)</div><div class="v" id="oTotal">–</div></div>
+  </div>
+  <div style="position:relative;height:240px;margin-top:16px"><canvas id="projChart"></canvas></div>
+  <div class="hint">Varsayılan aylık dağıtım son 12 ay ortalamasıdır. Fiyat sabit kabul edilir; DRIP seçiliyse net dağıtım aynı fiyattan yeni hisseye çevrilir.</div>
+</div>
+
+<div class="card" style="margin-top:16px">
+  <h2>Opsiyon getiri hesaplayıcı</h2>
+  <div class="tabs"><button class="on" data-t="cc">Covered Call (Kapalı alım)</button><button data-t="csp">CSP (Cash-Secured Put, nakit teminatlı satım)</button></div>
+  <div class="fields">
+    <div><label>Hisse fiyatı ($)</label><input id="oPx" type="number" step="0.01"></div>
+    <div><label>Kullanım fiyatı / strike ($)</label><input id="oK" type="number" step="0.5"></div>
+    <div><label>Prim (hisse başı $)</label><input id="oPrem" type="number" value="0.60" step="0.01"></div>
+    <div><label>Vadeye gün</label><input id="oDays" type="number" value="30" min="1"></div>
+    <div><label>Kontrat adedi</label><input id="oN" type="number" value="1" min="1"></div>
+  </div>
+  <div class="out">
+    <div><div class="l">Toplam prim ($)</div><div class="v pos" id="rPrem">–</div></div>
+    <div><div class="l">Dönem getirisi</div><div class="v" id="rRet">–</div></div>
+    <div><div class="l">Yıllıklandırılmış</div><div class="v pos" id="rAnn">–</div></div>
+    <div><div class="l" id="rBeL">Başabaş fiyat</div><div class="v gold" id="rBe">–</div></div>
+    <div><div class="l" id="rMaxL">Maks. kâr ($)</div><div class="v" id="rMax">–</div></div>
+    <div><div class="l" id="rCapL">Bağlanan sermaye ($)</div><div class="v" id="rCap">–</div></div>
+  </div>
+  <div class="hint" id="oHint"></div>
+</div>
+
+<footer>Veriler bilgilendirme amaçlıdır, yatırım tavsiyesi değildir. Fiyat ve dağıtım verisi her iş günü otomatik güncellenir.</footer>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const usd=(v,d=2)=>'$'+Number(v).toLocaleString('tr-TR',{minimumFractionDigits:d,maximumFractionDigits:d});
+const num=(v,d=0)=>Number(v).toLocaleString('tr-TR',{minimumFractionDigits:d,maximumFractionDigits:d});
+const pct=v=>'%'+num(v*100,2);
+const trDate=s=>new Date(s+'T00:00:00').toLocaleDateString('tr-TR',{day:'2-digit',month:'short',year:'numeric'});
+let D, avgDist, projChart, mode='cc';
+
+fetch('data/distributions.json',{cache:'no-store'}).then(r=>r.json()).then(init);
+
+function init(data){
+  D=data;
+  const ds=[...D.distributions].sort((a,b)=>a.ex.localeCompare(b.ex));
+  const last=ds[ds.length-1], ttm=ds.slice(-12), ttmSum=ttm.reduce((s,x)=>s+x.amount,0);
+  avgDist=ttmSum/ttm.length;
+  const min=Math.min(...ttm.map(x=>x.amount)), max=Math.max(...ttm.map(x=>x.amount));
+  $('updated').textContent='Veri güncelleme: '+trDate(D.updated);
+  $('kPrice').textContent=usd(D.lastClose);
+  $('kPriceDate').textContent=trDate(D.lastCloseDate)+' kapanış';
+  $('kLast').textContent=usd(last.amount,4);
+  $('kLastDate').textContent='Ödeme '+trDate(last.pay);
+  $('kTTM').textContent=usd(ttmSum,3);
+  $('kYield').textContent=pct(ttmSum/D.lastClose);
+  $('kAvg').textContent=usd(avgDist,3);
+  $('kRange').textContent='aralık '+usd(min,3)+' – '+usd(max,3);
+
+  new Chart($('distChart'),{type:'bar',
+    data:{labels:ds.map(x=>new Date(x.ex+'T00:00:00').toLocaleDateString('tr-TR',{month:'short',year:'2-digit'})),
+      datasets:[{data:ds.map(x=>x.amount),backgroundColor:ds.map((x,i)=>i>=ds.length-12?'#4f8cff':'#2a3a6e'),borderRadius:4}]},
+    options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>usd(c.raw,4)}}},
+      scales:{x:{ticks:{color:'#8f9ac0'},grid:{display:false}},y:{ticks:{color:'#8f9ac0',callback:v=>'$'+v},grid:{color:'#26305a'}}}}});
+
+  const tb=$('distTable').querySelector('tbody');
+  [...ds].reverse().forEach((x,i,arr)=>{
+    const prev=arr[i+1]; const ch=prev?(x.amount/prev.amount-1):null;
+    tb.insertAdjacentHTML('beforeend',`<tr><td>${trDate(x.ex)}</td><td>${trDate(x.pay)}</td><td>${x.amount.toFixed(4)}</td><td class="${ch==null?'':ch>=0?'pos':'neg'}">${ch==null?'–':(ch>=0?'+':'')+num(ch*100,1)+'%'}</td></tr>`);
+  });
+
+  $('buyPx').value=D.lastClose.toFixed(2);
+  $('assumeDist').value=avgDist.toFixed(4);
+  $('oPx').value=D.lastClose.toFixed(2);
+  $('oK').value=(Math.ceil(D.lastClose)+1).toFixed(1);
+  document.querySelectorAll('input,select').forEach(e=>e.addEventListener('input',()=>{calcIncome();calcOpt();}));
+  document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{
+    document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('on'));b.classList.add('on');mode=b.dataset.t;
+    const px=+$('oPx').value; $('oK').value=(mode==='cc'?Math.ceil(px)+1:Math.floor(px)-2).toFixed(1); calcOpt();});
+  calcIncome(); calcOpt();
+}
+
+function calcIncome(){
+  const inv=+$('inv').value, px=+$('buyPx').value, dist=+$('assumeDist').value, fx=+$('fx').value,
+        tax=+$('tax').value/100, drip=$('drip').value==='1', years=Math.max(1,Math.min(30,+$('years').value||1));
+  if(!(inv>0&&px>0)) return;
+  let sh=inv/px, total=0; const labels=[], vals=[];
+  for(let m=1;m<=years*12;m++){
+    const net=sh*dist*(1-tax); total+=net; if(drip) sh+=net/px;
+    if(m%12===0){labels.push(m/12+'. yıl');vals.push(sh*dist*(1-tax));}
+  }
+  const sh0=inv/px, m0=sh0*dist*(1-tax);
+  $('oShares').textContent=num(sh0,0);
+  $('oMonthUsd').textContent=usd(m0);
+  $('oMonthTry').textContent='₺'+num(m0*fx,0);
+  $('oYearUsd').textContent=usd(m0*12,0);
+  $('oEndMonth').textContent=usd(vals[vals.length-1]);
+  $('oTotal').textContent=usd(total,0);
+  if(projChart) projChart.destroy();
+  projChart=new Chart($('projChart'),{type:'line',data:{labels,datasets:[{data:vals,borderColor:'#2ecc8f',backgroundColor:'rgba(46,204,143,.12)',fill:true,tension:.3,pointRadius:3}]},
+    options:{animation:false,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'Aylık '+usd(c.raw)}}},
+      scales:{x:{ticks:{color:'#8f9ac0'},grid:{display:false}},y:{beginAtZero:true,ticks:{color:'#8f9ac0',callback:v=>'$'+num(v)},grid:{color:'#26305a'}}}}});
+}
+
+function calcOpt(){
+  const px=+$('oPx').value, K=+$('oK').value, p=+$('oPrem').value, d=Math.max(1,+$('oDays').value), n=Math.max(1,+$('oN').value);
+  if(!(px>0&&K>0)) return;
+  const prem=p*100*n;
+  if(mode==='cc'){
+    const cap=px*100*n, ret=p/px, maxP=(Math.max(0,K-px)+p)*100*n;
+    $('rBeL').textContent='Başabaş fiyat'; $('rMaxL').textContent='Maks. kâr ($)'; $('rCapL').textContent='Hisse değeri ($)';
+    $('rPrem').textContent=usd(prem,0); $('rRet').textContent=pct(ret); $('rAnn').textContent=pct(ret*365/d);
+    $('rBe').textContent=usd(px-p); $('rMax').textContent=usd(maxP,0); $('rCap').textContent=usd(cap,0);
+    $('oHint').textContent=`${n*100} JEPQ hissesine karşı ${usd(K)} strike'lı call satılır. Fiyat vadede ${usd(K)} üzerindeyse hisseler ${usd(K)}'dan satılır (maks. kâr ${pct((maxP/cap))}); altındaysa prim cebinizde kalır ve aylık JEPQ dağıtımı da devam eder.`;
+  } else {
+    const cap=K*100*n, ret=p/K, maxP=prem;
+    $('rBeL').textContent='Etkin alış fiyatı'; $('rMaxL').textContent='Maks. kâr ($)'; $('rCapL').textContent='Teminat nakit ($)';
+    $('rPrem').textContent=usd(prem,0); $('rRet').textContent=pct(ret); $('rAnn').textContent=pct(ret*365/d);
+    $('rBe').textContent=usd(K-p); $('rMax').textContent=usd(maxP,0); $('rCap').textContent=usd(cap,0);
+    const disc=(K-p)/px-1;
+    $('oHint').textContent=`${usd(cap,0)} nakit teminatla ${usd(K)} strike'lı put satılır. Fiyat vadede ${usd(K)} altındaysa ${n*100} hisse ${usd(K-p)} etkin maliyetle alınır (bugünkü fiyata göre ${pct(Math.abs(disc))} ${disc<0?'indirimli':'primli'}); üstündeyse prim kazanç olarak kalır.`;
+  }
+}
+</script>
+</body>
+</html>
