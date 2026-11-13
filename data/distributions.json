@@ -1,8 +1,8 @@
 {
   "symbol": "JEPQ",
-  "updated": "2026-11-12",
-  "lastClose": 56.78,
-  "lastCloseDate": "2026-11-12",
+  "updated": "2026-11-13",
+  "lastClose": 56.19,
+  "lastCloseDate": "2026-11-13",
   "expenseRatio": 0.35,
   "distributions": [
     {
@@ -109,6 +109,11 @@
       "ex": "2026-10-01",
       "pay": "2026-10-05",
       "amount": 0.56687
+    },
+    {
+      "ex": "2026-11-02",
+      "pay": "2026-11-04",
+      "amount": 0.54
     }
   ]
 }
